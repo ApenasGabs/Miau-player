@@ -1,10 +1,10 @@
-import styles from '../styles/Home.module.css'
+import styles from "../styles/Home.module.css";
 
 export default function Home() {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-       <h1>miau</h1>
+        <h1>miau</h1>
       </main>
 
       <footer className={styles.footer}>
@@ -13,10 +13,10 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <img src="/cathd.svg" alt="Prrrrrr Logo" className={styles.logo} />
         </a>
       </footer>
     </div>
-  )
+  );
 }

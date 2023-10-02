@@ -29,7 +29,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           type="image/png"
           sizes="32x32"
         />
-        <meta name="theme-color" content="#317EFB" />
+        <meta name="theme-color" content="#483d8b" />
       </Head>
       <Component {...pageProps} />
     </>
