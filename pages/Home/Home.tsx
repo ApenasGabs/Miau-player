@@ -1,8 +1,10 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from "react";
 import { StyledHome } from "./Home.styles";
 
 const HomePage: React.FC = () => {
-  const [playlistData, setPlaylistData] = useState<{ [key: string]: any[] } | null>(null);
+  const [playlistData, setPlaylistData] = useState<{
+    [key: string]: any[];
+  } | null>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -19,15 +21,15 @@ const HomePage: React.FC = () => {
   };
 
   const parseM3U = (data: string) => {
-    const lines = data.split('\n');
+    const lines = data.split("\n");
 
     let currentCategory: string | null = null;
     const categories: { [key: string]: any[] } = {};
 
     for (const line of lines) {
-      if (line.trim() === '#EXTM3U') {
+      if (line.trim() === "#EXTM3U") {
         // Início da lista de reprodução
-      } else if (line.startsWith('#EXTINF:')) {
+      } else if (line.startsWith("#EXTINF:")) {
         // Informações sobre a faixa, como duração e metadados
         const extinfMatch = line.match(/#EXTINF:(-?\d+) (.+)/);
         if (extinfMatch) {
@@ -44,13 +46,13 @@ const HomePage: React.FC = () => {
             currentCategory = null;
           }
         }
-      } else if (line.trim() !== '' && line.startsWith('http')) {
+      } else if (line.trim() !== "" && line.startsWith("http")) {
         // URL da mídia
         if (currentCategory) {
           if (!categories[currentCategory]) {
             categories[currentCategory] = [];
           }
-          categories[currentCategory].push({ 'Media URL': line });
+          categories[currentCategory].push({ "Media URL": line });
         }
       }
     }
@@ -71,7 +73,7 @@ const HomePage: React.FC = () => {
             <ul>
               {playlistData[category].map((item, itemIndex) => (
                 <li key={itemIndex}>
-                  <a href={item['Media URL']}>Item {itemIndex + 1}</a>
+                  <a href={item["Media URL"]}>Item {itemIndex + 1}</a>
                 </li>
               ))}
             </ul>
