@@ -1,12 +1,13 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, type ChangeEvent } from "react";
 import { StyledHome } from "./Home.styles";
 
 const HomePage: React.FC = () => {
-  const [playlistData, setPlaylistData] = useState<{
-    [key: string]: any[];
-  } | null>(null);
+  const [playlistData, setPlaylistData] = useState<Record<
+    string,
+    any[]
+  > | null>(null);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -20,11 +21,11 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const parseM3U = (data: string) => {
+  const parseM3U = (data: string): void => {
     const lines = data.split("\n");
 
     let currentCategory: string | null = null;
-    const categories: { [key: string]: any[] } = {};
+    const categories: Record<string, any[]> = {};
 
     for (const line of lines) {
       if (line.trim() === "#EXTM3U") {
@@ -32,15 +33,16 @@ const HomePage: React.FC = () => {
       } else if (line.startsWith("#EXTINF:")) {
         // Informações sobre a faixa, como duração e metadados
         const extinfMatch = line.match(/#EXTINF:(-?\d+) (.+)/);
-        if (extinfMatch) {
+        if (extinfMatch != null) {
           const metadata = extinfMatch[2];
-
           // Extrair informações de tvg-name, tvg-logo e group-title, se disponíveis
           const tvgNameMatch = metadata.match(/tvg-name="([^"]+)"/);
+          console.log("tvgNameMatch: ", tvgNameMatch);
           const tvgLogoMatch = metadata.match(/tvg-logo="([^"]+)"/);
+          console.log("tvgLogoMatch: ", tvgLogoMatch);
           const groupTitleMatch = metadata.match(/group-title="([^"]+)"/);
 
-          if (groupTitleMatch) {
+          if (groupTitleMatch != null) {
             currentCategory = groupTitleMatch[1];
           } else {
             currentCategory = null;
@@ -48,8 +50,8 @@ const HomePage: React.FC = () => {
         }
       } else if (line.trim() !== "" && line.startsWith("http")) {
         // URL da mídia
-        if (currentCategory) {
-          if (!categories[currentCategory]) {
+        if (currentCategory != null) {
+          if (!(currentCategory in categories)) {
             categories[currentCategory] = [];
           }
           categories[currentCategory].push({ "Media URL": line });

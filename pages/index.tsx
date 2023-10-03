@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import HomePage from "./Home/Home";
 
@@ -16,7 +17,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           Powered by{" "}
-          <img src="/cathd.svg" alt="Prrrrrr Logo" className={styles.logo} />
+          <Image src="/cathd.svg" alt="Prrrrrr Logo" className={styles.logo} />
         </a>
       </footer>
     </div>
