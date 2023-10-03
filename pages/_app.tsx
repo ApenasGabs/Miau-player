@@ -1,6 +1,6 @@
-import Head from 'next/head'
-import '../styles/globals.css'
-import { AppProps } from 'next/app'
+import Head from "next/head";
+import "../styles/globals.css";
+import { AppProps } from "next/app";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -17,21 +17,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <title>Miau player</title>
 
         <link rel="manifest" href="/manifest.json" />
-        <link
-          href="/icons/16.png"
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-        />
-        <link
-          href="/icons/32.png"
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-        />
+        <link href="/icons/16.png" rel="icon" type="image/png" sizes="16x16" />
+        <link href="/icons/32.png" rel="icon" type="image/png" sizes="32x32" />
         <meta name="theme-color" content="#483d8b" />
       </Head>
       <Component {...pageProps} />
     </>
-  )
+  );
 }
