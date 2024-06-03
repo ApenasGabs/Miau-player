@@ -1,11 +1,17 @@
-
-import React, { ChangeEvent, FC, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useState } from "react";
 
 const Home: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
     string,
     { "Media URL": string }[]
   > | null>(null);
+
+  useEffect(() => {
+    const storedPlaylistData = localStorage.getItem("playlistData");
+    if (storedPlaylistData) {
+      setPlaylistData(JSON.parse(storedPlaylistData));
+    }
+  }, []);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
@@ -60,6 +66,7 @@ const Home: FC = () => {
     }
 
     setPlaylistData(categories);
+    localStorage.setItem("playlistData", JSON.stringify(categories));
   };
 
   return (
