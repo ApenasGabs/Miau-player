@@ -1,10 +1,10 @@
-import React, { useState, type ChangeEvent } from "react";
-import { StyledHome } from "./Home.styles";
 
-const HomePage: React.FC = () => {
+import React, { ChangeEvent, FC, useState } from 'react';
+
+const HomePage: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
     string,
-    any[]
+    { "Media URL": string }[]
   > | null>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
     const lines = data.split("\n");
 
     let currentCategory: string | null = null;
-    const categories: Record<string, any[]> = {};
+    const categories: Record<string, { "Media URL": string }[]> = {};
 
     for (const line of lines) {
       if (line.trim() === "#EXTM3U") {
@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <StyledHome>
+    <div>
       <p>Home</p>
 
       <input type="file" onChange={handleFileChange} />
@@ -81,7 +81,7 @@ const HomePage: React.FC = () => {
             </ul>
           </div>
         ))}
-    </StyledHome>
+    </div>
   );
 };
 
