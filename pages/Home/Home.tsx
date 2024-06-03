@@ -3,13 +3,14 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 const Home: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
     string,
-    { "Media URL": string }[]
+    Record<string, { "Media URL": string }[]>
   > | null>(null);
 
   useEffect(() => {
-    const storedPlaylistData = localStorage.getItem("playlistData");
-    if (storedPlaylistData) {
-      setPlaylistData(JSON.parse(storedPlaylistData));
+    // Carregar dados do localStorage ao carregar a página
+    const savedData = loadAllCategoriesFromLocalStorage();
+    if (Object.keys(savedData).length > 0) {
+      setPlaylistData(savedData);
     }
   }, []);
 
@@ -31,7 +32,6 @@ const Home: FC = () => {
     const lines = data.split("\n");
 
     let currentCategory: string | null = null;
-    const categories: Record<string, { "Media URL": string }[]> = {};
 
     for (const line of lines) {
       if (line.trim() === "#EXTM3U") {
@@ -42,10 +42,6 @@ const Home: FC = () => {
         if (extinfMatch != null) {
           const metadata = extinfMatch[2];
           // Extrair informações de tvg-name, tvg-logo e group-title, se disponíveis
-          const tvgNameMatch = metadata.match(/tvg-name="([^"]+)"/);
-          console.log("tvgNameMatch: ", tvgNameMatch);
-          const tvgLogoMatch = metadata.match(/tvg-logo="([^"]+)"/);
-          console.log("tvgLogoMatch: ", tvgLogoMatch);
           const groupTitleMatch = metadata.match(/group-title="([^"]+)"/);
 
           if (groupTitleMatch != null) {
@@ -57,16 +53,53 @@ const Home: FC = () => {
       } else if (line.trim() !== "" && line.startsWith("http")) {
         // URL da mídia
         if (currentCategory != null) {
-          if (!(currentCategory in categories)) {
-            categories[currentCategory] = [];
-          }
-          categories[currentCategory].push({ "Media URL": line });
+          const [mainGroup, subGroup, ...rest] = currentCategory.split(" | ");
+          const finalSubGroup = [subGroup, ...rest].filter(Boolean).join(" | ") || "No Subgroup";
+          saveCategoryToLocalStorage(mainGroup, finalSubGroup, { "Media URL": line });
         }
       }
     }
 
-    setPlaylistData(categories);
-    localStorage.setItem("playlistData", JSON.stringify(categories));
+    // Atualiza o estado com os dados do localStorage
+    const updatedData = loadAllCategoriesFromLocalStorage();
+    setPlaylistData(updatedData);
+  };
+
+  const saveCategoryToLocalStorage = (
+    mainGroup: string,
+    subGroup: string,
+    mediaItem: { "Media URL": string }
+  ) => {
+    const savedData = localStorage.getItem(mainGroup);
+    let categoryData: Record<string, { "Media URL": string }[]> = {};
+
+    if (savedData) {
+      categoryData = JSON.parse(savedData);
+    }
+
+    if (!(subGroup in categoryData)) {
+      categoryData[subGroup] = [];
+    }
+
+    categoryData[subGroup].push(mediaItem);
+
+    localStorage.setItem(mainGroup, JSON.stringify(categoryData));
+  };
+
+  const loadAllCategoriesFromLocalStorage = (): Record<string, Record<string, { "Media URL": string }[]>> => {
+    const allCategories: Record<string, Record<string, { "Media URL": string }[]>> = {};
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const categoryData = localStorage.getItem(key);
+        if (categoryData) {
+          allCategories[key] = JSON.parse(categoryData);
+        }
+      }
+    }
+
+    return allCategories;
   };
 
   return (
@@ -76,16 +109,21 @@ const Home: FC = () => {
       <input type="file" onChange={handleFileChange} />
 
       {playlistData &&
-        Object.keys(playlistData).map((category, index) => (
+        Object.keys(playlistData).map((mainGroup, index) => (
           <div key={index}>
-            <h2>{category}</h2>
-            <ul>
-              {playlistData[category].map((item, itemIndex) => (
-                <li key={itemIndex}>
-                  <a href={item["Media URL"]}>Item {itemIndex + 1}</a>
-                </li>
-              ))}
-            </ul>
+            <h2>{mainGroup}</h2>
+            {Object.keys(playlistData[mainGroup]).map((subGroup, subIndex) => (
+              <div key={subIndex}>
+                <h3>{subGroup}</h3>
+                <ul>
+                  {playlistData[mainGroup][subGroup].map((item, itemIndex) => (
+                    <li key={itemIndex}>
+                      <a href={item["Media URL"]}>Item {itemIndex + 1}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         ))}
     </div>
