@@ -1,7 +1,7 @@
 
 import React, { ChangeEvent, FC, useState } from 'react';
 
-const HomePage: FC = () => {
+const Home: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
     string,
     { "Media URL": string }[]
@@ -85,4 +85,4 @@ const HomePage: FC = () => {
   );
 };
 
-export default HomePage;
+export default Home;
