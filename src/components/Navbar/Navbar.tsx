@@ -3,15 +3,16 @@ import { Link } from "react-router-dom";
 const Navbar = () => {
   const buttons = [
     <li>
-      <Link to={"/live"}>
-        <button>Ao Vivo</button>
-      </Link>
+      <Link to={"/"}>Home</Link>
     </li>,
     <li>
-      <a>Series</a>
+      <Link to={"/live"}>Ao Vivo</Link>
     </li>,
     <li>
-      <a>Filmes</a>
+      <Link to={"/series"}>Series</Link>
+    </li>,
+    <li>
+      <Link to={"/movies"}>Filmes</Link>
     </li>,
   ];
   return (
