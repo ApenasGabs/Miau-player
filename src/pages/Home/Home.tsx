@@ -1,9 +1,14 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
 
+interface MediaProps {
+  videoUrl: string;
+  title: string;
+}
+
 const Home: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
     string,
-    Record<string, { "Media URL": string }[]>
+    Record<string, MediaProps[]>
   > | null>(null);
 
   useEffect(() => {
@@ -21,7 +26,10 @@ const Home: FC = () => {
 
       reader.onload = (e) => {
         const contents = e.target?.result as string;
-        parseM3U(contents);
+        if (contents) {
+          console.log("contents: ", contents);
+          parseM3U(contents);
+        }
       };
 
       reader.readAsText(file);
@@ -29,18 +37,21 @@ const Home: FC = () => {
   };
 
   const parseM3U = (data: string): void => {
+    // eslint-disable-next-line no-debugger
+    debugger;
     const lines = data.split("\n");
-
     let currentCategory: string | null = null;
 
-    for (const line of lines) {
-      if (line.trim() === "#EXTM3U") {
-        // Início da lista de reprodução
-      } else if (line.startsWith("#EXTINF:")) {
-        // Informações sobre a faixa, como duração e metadados
-        const extinfMatch = line.match(/#EXTINF:(-?\d+) (.+)/);
+    for (let i = 0; i < lines.length; i += 2) {
+      const extinfLine = lines[i] ? lines[i].trim() : "";
+      const urlLine = lines[i + 1] ? lines[i + 1].trim() : "";
+
+      if (extinfLine.startsWith("#EXTINF:") && urlLine.startsWith("http")) {
+        const extinfMatch = extinfLine.match(/#EXTINF:(-?\d+), (.+)/);
         if (extinfMatch != null) {
           const metadata = extinfMatch[2];
+          const currentTitle = metadata; // Salva o título da faixa
+
           // Extrair informações de tvg-name, tvg-logo e group-title, se disponíveis
           const groupTitleMatch = metadata.match(/group-title="([^"]+)"/);
 
@@ -49,13 +60,16 @@ const Home: FC = () => {
           } else {
             currentCategory = null;
           }
-        }
-      } else if (line.trim() !== "" && line.startsWith("http")) {
-        // URL da mídia
-        if (currentCategory != null) {
-          const [mainGroup, subGroup, ...rest] = currentCategory.split(" | ");
-          const finalSubGroup = [subGroup, ...rest].filter(Boolean).join(" | ") || "No Subgroup";
-          saveCategoryToLocalStorage(mainGroup, finalSubGroup, { "Media URL": line });
+
+          if (currentCategory != null) {
+            const [mainGroup, subGroup, ...rest] = currentCategory.split(" | ");
+            const finalSubGroup =
+              [subGroup, ...rest].filter(Boolean).join(" | ") || "No Subgroup";
+            saveCategoryToLocalStorage(mainGroup, finalSubGroup, {
+              videoUrl: urlLine,
+              title: currentTitle,
+            });
+          }
         }
       }
     }
@@ -68,10 +82,10 @@ const Home: FC = () => {
   const saveCategoryToLocalStorage = (
     mainGroup: string,
     subGroup: string,
-    mediaItem: { "Media URL": string }
+    mediaItem: MediaProps
   ) => {
     const savedData = localStorage.getItem(mainGroup);
-    let categoryData: Record<string, { "Media URL": string }[]> = {};
+    let categoryData: Record<string, MediaProps[]> = {};
 
     if (savedData) {
       categoryData = JSON.parse(savedData);
@@ -86,8 +100,11 @@ const Home: FC = () => {
     localStorage.setItem(mainGroup, JSON.stringify(categoryData));
   };
 
-  const loadAllCategoriesFromLocalStorage = (): Record<string, Record<string, { "Media URL": string }[]>> => {
-    const allCategories: Record<string, Record<string, { "Media URL": string }[]>> = {};
+  const loadAllCategoriesFromLocalStorage = (): Record<
+    string,
+    Record<string, MediaProps[]>
+  > => {
+    const allCategories: Record<string, Record<string, MediaProps[]>> = {};
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -118,7 +135,7 @@ const Home: FC = () => {
                 <ul>
                   {playlistData[mainGroup][subGroup].map((item, itemIndex) => (
                     <li key={itemIndex}>
-                      <a href={item["Media URL"]}>Item {itemIndex + 1}</a>
+                      <a href={item.videoUrl}>{item.title}</a>
                     </li>
                   ))}
                 </ul>
