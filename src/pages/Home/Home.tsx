@@ -1,9 +1,5 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
-
-interface MediaProps {
-  videoUrl: string;
-  title: string;
-}
+import { MediaProps } from "../../types";
 
 const Home: FC = () => {
   const [playlistData, setPlaylistData] = useState<Record<
@@ -27,7 +23,6 @@ const Home: FC = () => {
       reader.onload = (e) => {
         const contents = e.target?.result as string;
         if (contents) {
-          console.log("contents: ", contents);
           parseM3U(contents);
         }
       };
@@ -37,40 +32,35 @@ const Home: FC = () => {
   };
 
   const parseM3U = (data: string): void => {
-    // eslint-disable-next-line no-debugger
-    debugger;
-    const lines = data.split("\n");
     let currentCategory: string | null = null;
 
-    for (let i = 0; i < lines.length; i += 2) {
-      const extinfLine = lines[i] ? lines[i].trim() : "";
-      const urlLine = lines[i + 1] ? lines[i + 1].trim() : "";
+    const pattern =
+      /#EXTINF:-1 tvg-name="(.*?)" tvg-logo="(.*?)" group-title="(.*?)",(.*?)\n(.*?)\n/g;
+    let match: RegExpExecArray | null = null;
 
-      if (extinfLine.startsWith("#EXTINF:") && urlLine.startsWith("http")) {
-        const extinfMatch = extinfLine.match(/#EXTINF:(-?\d+), (.+)/);
-        if (extinfMatch != null) {
-          const metadata = extinfMatch[2];
-          const currentTitle = metadata; // Salva o título da faixa
+    while ((match = pattern.exec(data)) !== null) {
+      const currentTitle = match[4]; // Salva o título da faixa
+      const urlLine = match[5];
+      const logo = match[2];
 
-          // Extrair informações de tvg-name, tvg-logo e group-title, se disponíveis
-          const groupTitleMatch = metadata.match(/group-title="([^"]+)"/);
+      // Extrair informações de tvg-name, tvg-logo e group-title, se disponíveis
+      const groupTitleMatch = match[3];
 
-          if (groupTitleMatch != null) {
-            currentCategory = groupTitleMatch[1];
-          } else {
-            currentCategory = null;
-          }
+      if (groupTitleMatch != null) {
+        currentCategory = groupTitleMatch;
+      } else {
+        currentCategory = null;
+      }
 
-          if (currentCategory != null) {
-            const [mainGroup, subGroup, ...rest] = currentCategory.split(" | ");
-            const finalSubGroup =
-              [subGroup, ...rest].filter(Boolean).join(" | ") || "No Subgroup";
-            saveCategoryToLocalStorage(mainGroup, finalSubGroup, {
-              videoUrl: urlLine,
-              title: currentTitle,
-            });
-          }
-        }
+      if (currentCategory != null) {
+        const [mainGroup, subGroup, ...rest] = currentCategory.split(" | ");
+        const finalSubGroup =
+          [subGroup, ...rest].filter(Boolean).join(" | ") || "No Subgroup";
+        saveCategoryToLocalStorage(mainGroup, finalSubGroup, {
+          videoUrl: urlLine,
+          title: currentTitle,
+          logo,
+        });
       }
     }
 
@@ -135,6 +125,7 @@ const Home: FC = () => {
                 <ul>
                   {playlistData[mainGroup][subGroup].map((item, itemIndex) => (
                     <li key={itemIndex}>
+                      <img src={item.logo} alt={item.title + "image"} />
                       <a href={item.videoUrl}>{item.title}</a>
                     </li>
                   ))}
