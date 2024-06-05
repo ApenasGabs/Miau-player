@@ -5,13 +5,15 @@ import { resolveFinalUrl } from "./services/LiveServices";
 const Live = () => {
   const [liveChannels, setLiveChannels] = useState<CategoryData>();
   const [category, setCategory] = useState<string>("");
-  const [currentVideUrl, setCurrentVideoUrl] = useState<string>();
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
+
   useEffect(() => {
     const canais = window.localStorage.getItem("Canais");
     if (canais !== null) {
       setLiveChannels(JSON.parse(canais));
     }
   }, []);
+
   const handleVideoClick = async (url: string) => {
     const finalUrl = await resolveFinalUrl(url);
     setCurrentVideoUrl(finalUrl);
@@ -45,7 +47,6 @@ const Live = () => {
                     className="cursor-pointer"
                     key={`${itemIndex + item.title}`}
                   >
-                    {/* <img className="w-4" src={item.title} alt={item.title} /> */}
                     {item.title}
                   </li>
                 ))}
@@ -54,8 +55,8 @@ const Live = () => {
         </ul>
       </div>
       <div className="w-3/5">
-        {currentVideUrl ? (
-          <video controls autoPlay src={currentVideUrl} />
+        {currentVideoUrl ? (
+          <video controls autoPlay src={currentVideoUrl} />
         ) : (
           <p>Selecione um canal</p>
         )}
