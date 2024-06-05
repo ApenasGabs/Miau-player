@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { CategoryData } from "../../types";
+import { resolveFinalUrl } from "./services/LiveServices";
 
 const Live = () => {
   const [liveChannels, setLiveChannels] = useState<CategoryData>();
   const [category, setCategory] = useState<string>("");
-  // const [currentVideo, setCurrentVideo] = useState<string>("");
+  const [currentVideUrl, setCurrentVideoUrl] = useState<string>();
   useEffect(() => {
     const canais = window.localStorage.getItem("Canais");
     if (canais !== null) {
-      const testo = JSON.parse(canais);
-      console.log("testo: ", testo);
-
       setLiveChannels(JSON.parse(canais));
     }
   }, []);
+  const handleVideoClick = async (url: string) => {
+    const finalUrl = await resolveFinalUrl(url);
+    setCurrentVideoUrl(finalUrl);
+  };
 
   return liveChannels ? (
     <div className="hidden lg:flex flex-row w-full">
@@ -37,15 +39,27 @@ const Live = () => {
           {category &&
             Object.keys(liveChannels[category]).map((subGroup, subIndex) => (
               <div key={`${subIndex + subGroup}`}>
-                <h2>{subGroup}</h2>
                 {liveChannels[category].map((item, itemIndex) => (
-                  <li key={`${itemIndex + item.title}`}>{item.title}</li>
+                  <li
+                    onClick={() => handleVideoClick(item.videoUrl)}
+                    className="cursor-pointer"
+                    key={`${itemIndex + item.title}`}
+                  >
+                    {/* <img className="w-4" src={item.title} alt={item.title} /> */}
+                    {item.title}
+                  </li>
                 ))}
               </div>
             ))}
         </ul>
       </div>
-      <div className="w-3/5">Video</div>
+      <div className="w-3/5">
+        {currentVideUrl ? (
+          <video controls autoPlay src={currentVideUrl} />
+        ) : (
+          <p>Selecione um canal</p>
+        )}
+      </div>
     </div>
   ) : (
     <>Ops</>
