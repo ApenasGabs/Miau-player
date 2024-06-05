@@ -1,11 +1,8 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
-import { MediaProps } from "../../types";
+import { MediaProps, PlaylistData } from "../../types";
 
 const Home: FC = () => {
-  const [playlistData, setPlaylistData] = useState<Record<
-    string,
-    Record<string, MediaProps[]>
-  > | null>(null);
+  const [playlistData, setPlaylistData] = useState<PlaylistData | null>(null);
 
   useEffect(() => {
     // Carregar dados do localStorage ao carregar a página
@@ -90,10 +87,7 @@ const Home: FC = () => {
     localStorage.setItem(mainGroup, JSON.stringify(categoryData));
   };
 
-  const loadAllCategoriesFromLocalStorage = (): Record<
-    string,
-    Record<string, MediaProps[]>
-  > => {
+  const loadAllCategoriesFromLocalStorage = (): PlaylistData => {
     const allCategories: Record<string, Record<string, MediaProps[]>> = {};
 
     for (let i = 0; i < localStorage.length; i++) {
@@ -112,28 +106,10 @@ const Home: FC = () => {
   return (
     <div>
       <p>Home</p>
-
       <input type="file" onChange={handleFileChange} />
-
-      {playlistData &&
-        Object.keys(playlistData).map((mainGroup, index) => (
-          <div key={index}>
-            <h2>{mainGroup}</h2>
-            {Object.keys(playlistData[mainGroup]).map((subGroup, subIndex) => (
-              <div key={subIndex}>
-                <h3>{subGroup}</h3>
-                <ul>
-                  {playlistData[mainGroup][subGroup].map((item, itemIndex) => (
-                    <li key={itemIndex}>
-                      <img src={item.logo} alt={item.title + "image"} />
-                      <a href={item.videoUrl}>{item.title}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        ))}
+      <h1>
+        {playlistData ? "Playlist completa" : "faca upload para poder usar"}
+      </h1>
     </div>
   );
 };
